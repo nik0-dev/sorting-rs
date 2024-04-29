@@ -9,7 +9,7 @@ use rand::seq::SliceRandom;
 
 const SCREEN_WIDTH: u32 = 600;
 const SCREEN_HEIGHT: u32 = 600;
-const ARRAY_SIZE : usize = 600;
+const ARRAY_SIZE : usize = 200;
 
 
 
@@ -39,8 +39,15 @@ pub fn main() {
     let min_value = *array.iter().min().unwrap();
     let max_value = *array.iter().max().unwrap();
 
-
-    let mut color_table : [Color; 6] = [Color::RED, Color::RGB(255, 160, 0), Color::YELLOW, Color::GREEN, Color::BLUE, Color::RGB(255, 255, 0)];
+    let mut color_table : [Color; 7] = [
+        Color::RGB(0xFF, 0xAD, 0xAD), 
+        Color::RGB(0xFF, 0xD6, 0xA5), 
+        Color::RGB(0xFD, 0xFF, 0xB6),
+        Color::RGB(0x9B, 0xF6, 0xFF), 
+        Color::RGB(0xA0, 0xC4, 0xFF),
+        Color::RGB(0xBD, 0xB2, 0xFF), 
+        Color::RGB(0xFF, 0xC6, 0xFF)
+    ];
 
     'running: loop {       
 
@@ -51,10 +58,11 @@ pub fn main() {
             let frac = inv_lerp(min_value as f64, max_value as f64, value as f64);
             let bar_px_height: u32 = lerp(0 as f64, SCREEN_HEIGHT as f64, frac) as u32;
             
-            let color_table_i = lerp(0 as f64, 5 as f64, frac) as usize;
+            let color_table_i = lerp(0 as f64, 6 as f64, frac) as usize;
             canvas.set_draw_color(color_table[color_table_i]);
-
             canvas.fill_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
+            canvas.set_draw_color(Color::GRAY);
+            canvas.draw_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
         }
 
         canvas.present();
@@ -76,60 +84,67 @@ pub fn main() {
 
                     /* bubble */
                     
-                    // let n = array.len();
-                    // for i in 0..n {
-                    //     for j in 0..n-i-1 {
-                    //         if array[j] > array[j+1] {
-                    //             array.swap(j, j+1);
+                    let n = array.len();
+                    for i in 0..n {
+                        for j in 0..n-i-1 {
+                            if array[j] > array[j+1] {
+                                array.swap(j, j+1);
                 
-                    //             canvas.set_draw_color(Color::BLACK);
-                    //             canvas.clear();
+                                canvas.set_draw_color(Color::BLACK);
+                                canvas.clear();
                                 
-                    //             for (index, &value) in array.iter().enumerate() {
-                    //                 let frac = inv_lerp(min_value as f64, max_value as f64, value as f64);
-                    //                 let bar_px_height: u32 = lerp(0 as f64, SCREEN_HEIGHT as f64, frac) as u32;
+                                for (index, &value) in array.iter().enumerate() {
+                                    let frac = inv_lerp(min_value as f64, max_value as f64, value as f64);
+                                    let bar_px_height: u32 = lerp(0 as f64, SCREEN_HEIGHT as f64, frac) as u32;
                                     
-                    //                 let color_table_i = lerp(0 as f64, 5 as f64, frac) as usize;
-                    //                 canvas.set_draw_color(color_table[color_table_i]);
-                                    
-                    //                 canvas.fill_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
-                    //             }
+                                    if (index != j) {
+                                        let color_table_i = lerp(0 as f64, 6 as f64, frac) as usize;
+                                        canvas.set_draw_color(color_table[color_table_i]);
+                                        canvas.fill_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
+                                        canvas.set_draw_color(Color::GRAY);
+                                        canvas.draw_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
+                                    } else {
+                                        canvas.set_draw_color(Color::WHITE);
+                                        canvas.fill_rect(Rect::new(index as i32 * bar_px_width, 0 as i32, bar_px_width as u32, SCREEN_HEIGHT)).unwrap();
+                                    }
 
-                    //             canvas.present();
-                    //             std::thread::sleep(Duration::new(0, 100_000));
-                    //         }
-                    //     }
-                    // }
+                                }
+
+                                canvas.present();
+                                std::thread::sleep(Duration::new(0, 500_000));
+                            }
+                        }
+                    }
 
                     /* selection */
                         
-                    let n = array.len();
-                    for i in 0..n {
-                        canvas.set_draw_color(Color::BLACK);
-                        canvas.clear();
+                    // let n = array.len();
+                    // for i in 0..n {
+                    //     canvas.set_draw_color(Color::BLACK);
+                    //     canvas.clear();
                         
-                        let mut min_index = i;
-                        for j in (i + 1)..n {
-                            if array[j] < array[min_index] {
-                                min_index = j;
-                            }
-                        }
-                        if min_index != i {
-                            array.swap(i, min_index);
-                        }
+                    //     let mut min_index = i;
+                    //     for j in (i + 1)..n {
+                    //         if array[j] < array[min_index] {
+                    //             min_index = j;
+                    //         }
+                    //     }
+                    //     if min_index != i {
+                    //         array.swap(i, min_index);
+                    //     }
 
-                        for (index, &value) in array.iter().enumerate() {
-                            let frac = inv_lerp(min_value as f64, max_value as f64, value as f64);
-                            let bar_px_height: u32 = lerp(0 as f64, SCREEN_HEIGHT as f64, frac) as u32;
+                    //     for (index, &value) in array.iter().enumerate() {
+                    //         let frac = inv_lerp(min_value as f64, max_value as f64, value as f64);
+                    //         let bar_px_height: u32 = lerp(0 as f64, SCREEN_HEIGHT as f64, frac) as u32;
                             
-                            let color_table_i = lerp(0 as f64, 5 as f64, frac) as usize;
-                            canvas.set_draw_color(color_table[color_table_i]);
+                    //         let color_table_i = lerp(0 as f64, 5 as f64, frac) as usize;
+                    //         canvas.set_draw_color(color_table[color_table_i]);
                             
-                            canvas.fill_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
-                        }
-                        canvas.present();
-                        std::thread::sleep(Duration::new(0, 500_000));
-                    }
+                    //         canvas.fill_rect(Rect::new(index as i32 * bar_px_width, (SCREEN_HEIGHT - bar_px_height) as i32, bar_px_width as u32, bar_px_height)).unwrap();
+                    //     }
+                    //     canvas.present();
+                    //     std::thread::sleep(Duration::new(0, 3_000_000));
+                    // }
 
                 },
 
